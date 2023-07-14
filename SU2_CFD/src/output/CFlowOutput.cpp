@@ -902,10 +902,10 @@ void CFlowOutput::AddHistoryOutputFields_ScalarRMS_RES(const CConfig* config) {
       break;
 
     case TURB_FAMILY::KW:
-      /// DESCRIPTION: Root-mean square residual of kinetic energy (SST model).
-      AddHistoryOutput("RMS_TKE", "rms[k]",  ScreenOutputFormat::FIXED, "RMS_RES", "Root-mean square residual of kinetic energy (SST model).", HistoryFieldType::RESIDUAL);
-      /// DESCRIPTION: Root-mean square residual of the dissipation (SST model).
-      AddHistoryOutput("RMS_DISSIPATION", "rms[w]",  ScreenOutputFormat::FIXED, "RMS_RES", "Root-mean square residual of dissipation (SST model).", HistoryFieldType::RESIDUAL);
+      /// DESCRIPTION: Root-mean square residual of kinetic energy (SST & KW model).
+      AddHistoryOutput("RMS_TKE", "rms[k]",  ScreenOutputFormat::FIXED, "RMS_RES", "Root-mean square residual of kinetic energy (SST & KW model).", HistoryFieldType::RESIDUAL);
+      /// DESCRIPTION: Root-mean square residual of the dissipation (SST & KW model).
+      AddHistoryOutput("RMS_DISSIPATION", "rms[w]",  ScreenOutputFormat::FIXED, "RMS_RES", "Root-mean square residual of dissipation (SST & KW model).", HistoryFieldType::RESIDUAL);
       break;
 
     case TURB_FAMILY::NONE: break;
@@ -977,10 +977,10 @@ void CFlowOutput::AddHistoryOutputFields_ScalarBGS_RES(const CConfig* config) {
       break;
 
     case TURB_FAMILY::KW:
-      /// DESCRIPTION: Maximum residual of kinetic energy (SST model).
-      AddHistoryOutput("BGS_TKE", "bgs[k]", ScreenOutputFormat::FIXED, "BGS_RES", "BGS residual of kinetic energy (SST model).", HistoryFieldType::RESIDUAL);
-      /// DESCRIPTION: Maximum residual of the dissipation (SST model).
-      AddHistoryOutput("BGS_DISSIPATION", "bgs[w]",  ScreenOutputFormat::FIXED, "BGS_RES", "BGS residual of dissipation (SST model).", HistoryFieldType::RESIDUAL);
+      /// DESCRIPTION: Maximum residual of kinetic energy (SST & KW model).
+      AddHistoryOutput("BGS_TKE", "bgs[k]", ScreenOutputFormat::FIXED, "BGS_RES", "BGS residual of kinetic energy (SST & KW model).", HistoryFieldType::RESIDUAL);
+      /// DESCRIPTION: Maximum residual of the dissipation (SST & KW model).
+      AddHistoryOutput("BGS_DISSIPATION", "bgs[w]",  ScreenOutputFormat::FIXED, "BGS_RES", "BGS residual of dissipation (SST & KW model).", HistoryFieldType::RESIDUAL);
       break;
 
     case TURB_FAMILY::NONE: break;

@@ -44,6 +44,7 @@ void COutputLegacy::ComputeTurboPerformance(CSolver *solver_container, CGeometry
   su2double muLam, kine, omega, nu;
   bool turbulent = ((config->GetKind_Solver() == MAIN_SOLVER::RANS) || (config->GetKind_Solver() == MAIN_SOLVER::DISC_ADJ_RANS));
   bool menter_sst       = (config->GetKind_Turb_Model() == TURB_MODEL::SST);
+  bool wilcox_komega    = (config->GetKind_Turb_Model() == TURB_MODEL::KW);
 
   unsigned short nBladesRow, nStages;
 
@@ -131,7 +132,7 @@ void COutputLegacy::ComputeTurboPerformance(CSolver *solver_container, CGeometry
       if(turbulent){
         FluidModel->SetTDState_Prho(PressureIn[iMarkerTP][iSpan], DensityIn[iMarkerTP][iSpan]);
         muLam  = FluidModel->GetLaminarViscosity();
-        if(menter_sst){
+        if(menter_sst || wilcox_komega ){
           kine   = solver_container->GetKineIn(iMarkerTP, iSpan);
           omega  = solver_container->GetOmegaIn(iMarkerTP, iSpan);
           TurbIntensityIn[iMarkerTP][iSpan]     =  sqrt(2.0/3.0*kine/absVel2);
@@ -218,7 +219,7 @@ void COutputLegacy::ComputeTurboPerformance(CSolver *solver_container, CGeometry
       if(turbulent){
         FluidModel->SetTDState_Prho(PressureOut[iMarkerTP][iSpan], DensityOut[iMarkerTP][iSpan]);
         muLam  = FluidModel->GetLaminarViscosity();
-        if(menter_sst){
+        if(menter_sst || wilcox_komega){
           kine   = solver_container->GetKineOut(iMarkerTP, iSpan);
           omega  = solver_container->GetOmegaOut(iMarkerTP, iSpan);
           TurbIntensityOut[iMarkerTP][iSpan]     =  sqrt(2.0/3.0*kine/absVel2);

@@ -97,3 +97,5 @@ ninja
 
 # Ignore vscode folder
 .vscode/
+
+build.sh

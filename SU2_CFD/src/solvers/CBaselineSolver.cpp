@@ -423,7 +423,7 @@ void CBaselineSolver::LoadRestart(CGeometry **geometry, CSolver ***solver, CConf
 
         if (turb_model == TURB_MODEL::SA) {
           index++;
-        } else if (turb_model == TURB_MODEL::SST) {
+        } else if (turb_model == TURB_MODEL::SST || turb_model == TURB_MODEL::KW) {
           index+=2;
         }
 

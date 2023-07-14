@@ -483,6 +483,9 @@ void COutputLegacy::SetConvHistory_Header(ofstream *ConvHist_file, CConfig *conf
     case TURB_MODEL::SST:
       SPRINTF (turb_resid, ",\"Res_Turb[0]\",\"Res_Turb[1]\"");
       break;
+    case TURB_MODEL::KW:
+      SPRINTF (turb_resid, ",\"Res_Turb[0]\",\"Res_Turb[1]\"");
+      break;
     default: break;
   }
   switch (config->GetKind_Turb_Model()) {
@@ -490,6 +493,9 @@ void COutputLegacy::SetConvHistory_Header(ofstream *ConvHist_file, CConfig *conf
       SPRINTF (adj_turb_resid, ",\"Res_AdjTurb[0]\"");
       break;
     case TURB_MODEL::SST:
+      SPRINTF (adj_turb_resid, ",\"Res_AdjTurb[0]\",\"Res_AdjTurb[1]\"");
+      break;
+    case TURB_MODEL::KW:
       SPRINTF (adj_turb_resid, ",\"Res_AdjTurb[0]\",\"Res_AdjTurb[1]\"");
       break;
     default: break;
@@ -865,6 +871,7 @@ void COutputLegacy::SetConvHistory_Body(ofstream *ConvHist_file,
       switch (config[val_iZone]->GetKind_Turb_Model()) {
         case TURB_MODEL::SA: nVar_Turb = 1; break;
         case TURB_MODEL::SST: nVar_Turb = 2; break;
+        case TURB_MODEL::KW: nVar_Turb = 2; break;
         default: break;
       }
     }
@@ -885,8 +892,9 @@ void COutputLegacy::SetConvHistory_Body(ofstream *ConvHist_file,
     if (compressible) nVar_AdjFlow = nDim+2; else nVar_AdjFlow = nDim+2;
     if (turbulent) {
       switch (config[val_iZone]->GetKind_Turb_Model()) {
-        case TURB_MODEL::SA: nVar_AdjTurb = 1; break;
+        case TURB_MODEL::SA:  nVar_AdjTurb = 1; break;
         case TURB_MODEL::SST: nVar_AdjTurb = 2; break;
+        case TURB_MODEL::KW:  nVar_AdjTurb = 2; break;
         default: break;
       }
     }
@@ -1783,8 +1791,9 @@ void COutputLegacy::SetConvHistory_Body(ofstream *ConvHist_file,
             else cout << "      Res[Rho]";//, cout << "     Res[RhoE]";
 
             switch (config[val_iZone]->GetKind_Turb_Model()) {
-              case TURB_MODEL::SA: cout << "       Res[nu]"; break;
+              case TURB_MODEL::SA:  cout << "       Res[nu]"; break;
               case TURB_MODEL::SST: cout << "     Res[kine]" << "    Res[omega]"; break;
+              case TURB_MODEL::KW:  cout << "     Res[kine]" << "    Res[omega]"; break;
               default: break;
             }
 
@@ -2822,6 +2831,7 @@ void COutputLegacy::SpecialOutput_ForcesBreakdown(CSolver *****solver, CGeometry
         switch (Kind_Turb_Model) {
           case TURB_MODEL::SA:        Breakdown_file << "Spalart Allmaras" << "\n"; break;
           case TURB_MODEL::SST:       Breakdown_file << "Menter's SST"     << "\n"; break;
+          case TURB_MODEL::KW:        Breakdown_file << "Wilcox's k omega"     << "\n"; break;
           default: break;
         }
         break;
@@ -6108,6 +6118,7 @@ void COutputLegacy::WriteTurboPerfConvHistory(CConfig *config){
   unsigned short nZone       = config->GetnZone();
   bool turbulent = ((config->GetKind_Solver() == MAIN_SOLVER::RANS) || (config->GetKind_Solver() == MAIN_SOLVER::DISC_ADJ_RANS));
   bool menter_sst = (config->GetKind_Turb_Model() == TURB_MODEL::SST);
+  bool wilcox_komega = (config->GetKind_Turb_Model() == TURB_MODEL::KW);
 
   unsigned short nBladesRow, nStages;
   unsigned short iStage;
@@ -6142,7 +6153,7 @@ void COutputLegacy::WriteTurboPerfConvHistory(CConfig *config){
       cout << endl;
       cout << endl;
       if(turbulent){
-        if(menter_sst){
+        if(menter_sst || wilcox_komega){
           cout << "     Inlet TurbIntensity" << "      Inlet TurbIntensity BC" << "      err(%)" <<  endl;
           cout.width(25); cout << TurbIntensityIn[iMarker_Monitoring][config->GetnSpan_iZones(iMarker_Monitoring)];
           cout.width(25); cout << config->GetTurbulenceIntensity_FreeStream();
@@ -6277,7 +6288,7 @@ void COutputLegacy::WriteTurboPerfConvHistory(CConfig *config){
       if(turbulent){
         cout << endl;
         cout << endl;
-        if(menter_sst){
+        if(menter_sst || wilcox_komega){
           cout << "     Outlet TurbIntensity " << "    Inlet TurbIntensity" << "         err(%)" <<  endl;
           cout.width(25); cout << TurbIntensityOut[iMarker_Monitoring][config->GetnSpan_iZones(iMarker_Monitoring)];
           cout.width(25); cout << TurbIntensityIn[iMarker_Monitoring + 1][config->GetnSpan_iZones(iMarker_Monitoring +1)];

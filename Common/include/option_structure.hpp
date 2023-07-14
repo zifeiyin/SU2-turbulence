@@ -918,12 +918,14 @@ static const MapType<std::string, LIMITER> Limiter_Map = {
 enum class TURB_MODEL {
   NONE,      /*!< \brief No turbulence model. */
   SA,        /*!< \brief Kind of Turbulent model (Spalart-Allmaras). */
+  KW,        /*!< \brief Kind of Turbulent model (Wilcox k-omega). */
   SST,       /*!< \brief Kind of Turbulence model (Menter SST). */
 };
 static const MapType<std::string, TURB_MODEL> Turb_Model_Map = {
   MakePair("NONE", TURB_MODEL::NONE)
   MakePair("SA", TURB_MODEL::SA)
   MakePair("SST", TURB_MODEL::SST)
+  MakePair("KW", TURB_MODEL::KW)
 };
 
 /*!
@@ -945,9 +947,55 @@ inline TURB_FAMILY TurbModelFamily(TURB_MODEL model) {
       return TURB_FAMILY::SA;
     case TURB_MODEL::SST:
       return TURB_FAMILY::KW;
+    case TURB_MODEL::KW:
+      return TURB_FAMILY::KW;
   }
   return TURB_FAMILY::NONE;
 }
+
+/*!
+ * \brief KW Options
+ */
+enum class KW_OPTIONS {
+  NONE,        /*!< \brief No KW Turb model. */
+  V1988,       /*!< \brief 1988 Wilcox k-w model. */
+};
+static const MapType<std::string, KW_OPTIONS> KW_Options_Map = {
+  MakePair("NONE",  KW_OPTIONS::NONE)
+  MakePair("V1988", KW_OPTIONS::V1988)
+};
+/*!
+ * \brief Structure containing parsed KW options.
+ */
+struct KW_ParsedOptions {
+  KW_OPTIONS version    = KW_OPTIONS::V1988;   /*!< \brief Enum SST base model. */
+  KW_OPTIONS production = KW_OPTIONS::NONE; /*!< \brief Enum for production corrections/modifiers for SST model. */
+};
+/*!
+ * \brief Function to parse KW options.
+ * \param[in] KW_Options - Selected KW option from config.
+ * \param[in] nKW_Options - Number of options selected.
+ * \param[in] rank - MPI rank.
+ * \return Struct with KW options.
+ */
+inline KW_ParsedOptions ParseKWOptions(const KW_OPTIONS *KW_Options, unsigned short nKW_Options, int rank) {
+  KW_ParsedOptions KWParsedOptions;
+
+  auto IsPresent = [&](KW_OPTIONS option) {
+    const auto kw_options_end = KW_Options + nKW_Options;
+    return std::find(KW_Options, kw_options_end, option) != kw_options_end;
+  };
+
+  const bool found_1988 = IsPresent(KW_OPTIONS::V1988);
+
+  const bool komega_1988 = found_1988;
+
+  KWParsedOptions.version = KW_OPTIONS::V1988;
+
+  return KWParsedOptions;
+}
+
+
 
 /*!
  * \brief SST Options

@@ -714,25 +714,27 @@ private:
   *Marker_WallFunctions,              /*!< \brief Markers for which wall functions must be applied. */
   *Marker_SobolevBC;                  /*!< \brief Markers in the gradient solver */
 
-  unsigned short nConfig_Files;       /*!< \brief Number of config files for multiphysics problems. */
-  string *Config_Filenames;           /*!< \brief List of names for configuration files. */
-  SST_OPTIONS *SST_Options;           /*!< \brief List of modifications/corrections/versions of SST turbulence model.*/
-  SA_OPTIONS *SA_Options;             /*!< \brief List of modifications/corrections/versions of SA turbulence model.*/
-  LM_OPTIONS *LM_Options;             /*!< \brief List of modifications/corrections/versions of SA turbulence model.*/
-  unsigned short nSST_Options;        /*!< \brief Number of SST options specified. */
-  unsigned short nSA_Options;         /*!< \brief Number of SA options specified. */
-  unsigned short nLM_Options;         /*!< \brief Number of SA options specified. */
-  WALL_FUNCTIONS  *Kind_WallFunctions;        /*!< \brief The kind of wall function to use for the corresponding markers. */
-  unsigned short  **IntInfo_WallFunctions;    /*!< \brief Additional integer information for the wall function markers. */
-  su2double       **DoubleInfo_WallFunctions; /*!< \brief Additional double information for the wall function markers. */
-  unsigned short  *Marker_All_Monitoring,     /*!< \brief Global index for monitoring using the grid information. */
-  *Marker_All_GeoEval,               /*!< \brief Global index for geometrical evaluation. */
-  *Marker_All_Plotting,              /*!< \brief Global index for plotting using the grid information. */
-  *Marker_All_Analyze,               /*!< \brief Global index for plotting using the grid information. */
-  *Marker_All_ZoneInterface,         /*!< \brief Global index for FSI interface markers using the grid information. */
-  *Marker_All_Turbomachinery,        /*!< \brief Global index for Turbomachinery markers using the grid information. */
-  *Marker_All_TurbomachineryFlag,    /*!< \brief Global index for Turbomachinery markers flag using the grid information. */
-  *Marker_All_MixingPlaneInterface,  /*!< \brief Global index for MixingPlane interface markers using the grid information. */
+  unsigned short    nConfig_Files;       /*!< \brief Number of config files for multiphysics problems. */
+  string            *Config_Filenames;           /*!< \brief List of names for configuration files. */
+  SST_OPTIONS       *SST_Options;           /*!< \brief List of modifications/corrections/versions of SST turbulence model.*/
+  KW_OPTIONS        *KW_Options;            /*!< \brief List of modifications/corrections/versions of KW turbulence model.*/
+  SA_OPTIONS        *SA_Options;             /*!< \brief List of modifications/corrections/versions of SA turbulence model.*/
+  LM_OPTIONS        *LM_Options;             /*!< \brief List of modifications/corrections/versions of SA turbulence model.*/
+  unsigned short    nSST_Options;        /*!< \brief Number of SST options specified. */
+  unsigned short    nKW_Options;         /*!< \brief Number of KW options specified. */
+  unsigned short    nSA_Options;         /*!< \brief Number of SA options specified. */
+  unsigned short    nLM_Options;         /*!< \brief Number of SA options specified. */
+  WALL_FUNCTIONS    *Kind_WallFunctions;        /*!< \brief The kind of wall function to use for the corresponding markers. */
+  unsigned short    **IntInfo_WallFunctions;    /*!< \brief Additional integer information for the wall function markers. */
+  su2double         **DoubleInfo_WallFunctions; /*!< \brief Additional double information for the wall function markers. */
+  unsigned short    *Marker_All_Monitoring,     /*!< \brief Global index for monitoring using the grid information. */
+                    *Marker_All_GeoEval,               /*!< \brief Global index for geometrical evaluation. */
+                    *Marker_All_Plotting,              /*!< \brief Global index for plotting using the grid information. */
+                    *Marker_All_Analyze,               /*!< \brief Global index for plotting using the grid information. */
+                    *Marker_All_ZoneInterface,         /*!< \brief Global index for FSI interface markers using the grid information. */
+                    *Marker_All_Turbomachinery,        /*!< \brief Global index for Turbomachinery markers using the grid information. */
+                    *Marker_All_TurbomachineryFlag,    /*!< \brief Global index for Turbomachinery markers flag using the grid information. */
+                    *Marker_All_MixingPlaneInterface,  /*!< \brief Global index for MixingPlane interface markers using the grid information. */
   *Marker_All_DV,                    /*!< \brief Global index for design variable markers using the grid information. */
   *Marker_All_Moving,                /*!< \brief Global index for moving surfaces using the grid information. */
   *Marker_All_Deform_Mesh,           /*!< \brief Global index for deformable markers at the boundary. */
@@ -1157,17 +1159,18 @@ private:
   unsigned short nScreenOutput,   /*!< \brief Number of screen output variables (max: 6). */
   nHistoryOutput, nVolumeOutput;  /*!< \brief Number of variables printed to the history file. */
   bool Multizone_Residual;        /*!< \brief Determines if memory should be allocated for the multizone residual. */
-  SST_ParsedOptions sstParsedOptions; /*!< \brief Additional parameters for the SST turbulence model. */
-  SA_ParsedOptions saParsedOptions;   /*!< \brief Additional parameters for the SA turbulence model. */
-  LM_ParsedOptions lmParsedOptions;   /*!< \brief Additional parameters for the LM transition model. */
-  su2double uq_delta_b;         /*!< \brief Parameter used to perturb eigenvalues of Reynolds Stress Matrix */
-  unsigned short eig_val_comp;  /*!< \brief Parameter used to determine type of eigenvalue perturbation */
-  su2double uq_urlx;            /*!< \brief Under-relaxation factor */
-  bool uq_permute;              /*!< \brief Permutation of eigenvectors */
+  SST_ParsedOptions     sstParsedOptions; /*!< \brief Additional parameters for the SST turbulence model. */
+  KW_ParsedOptions      kwParsedOptions;  /*!< \brief Additional parameters for the KW turbulence model. */
+  SA_ParsedOptions      saParsedOptions;   /*!< \brief Additional parameters for the SA turbulence model. */
+  LM_ParsedOptions      lmParsedOptions;   /*!< \brief Additional parameters for the LM transition model. */
+  su2double             uq_delta_b;         /*!< \brief Parameter used to perturb eigenvalues of Reynolds Stress Matrix */
+  unsigned short        eig_val_comp;  /*!< \brief Parameter used to determine type of eigenvalue perturbation */
+  su2double             uq_urlx;            /*!< \brief Under-relaxation factor */
+  bool                  uq_permute;              /*!< \brief Permutation of eigenvectors */
 
-  unsigned long pastix_fact_freq;  /*!< \brief (Re-)Factorization frequency for PaStiX */
-  unsigned short pastix_verb_lvl;  /*!< \brief Verbosity level for PaStiX */
-  unsigned short pastix_fill_lvl;  /*!< \brief Fill level for PaStiX ILU */
+  unsigned long         pastix_fact_freq;  /*!< \brief (Re-)Factorization frequency for PaStiX */
+  unsigned short        pastix_verb_lvl;  /*!< \brief Verbosity level for PaStiX */
+  unsigned short        pastix_fill_lvl;  /*!< \brief Fill level for PaStiX ILU */
 
   string caseName;                 /*!< \brief Name of the current case */
 

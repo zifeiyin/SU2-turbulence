@@ -3303,9 +3303,14 @@ void CAdjEulerSolver::BC_Outlet(CGeometry *geometry, CSolver **solver_container,
 
         /*--- Turbulent kinetic energy ---*/
 
-        if (config->GetKind_Turb_Model() == TURB_MODEL::SST)
-          visc_numerics->SetTurbKineticEnergy(solver_container[TURB_SOL]->GetNodes()->GetSolution(iPoint,0), solver_container[TURB_SOL]->GetNodes()->GetSolution(iPoint,0));
-
+        if (
+            config->GetKind_Turb_Model() == TURB_MODEL::SST ||
+            config->GetKind_Turb_Model() == TURB_MODEL::KW
+           )
+        {
+          visc_numerics->SetTurbKineticEnergy(solver_container[TURB_SOL]->GetNodes()->GetSolution(iPoint,0), 
+                                              solver_container[TURB_SOL]->GetNodes()->GetSolution(iPoint,0));
+        }
         /*--- Gradient and limiter of Adjoint Variables ---*/
 
         visc_numerics->SetAdjointVarGradient(nodes->GetGradient(iPoint), nodes->GetGradient(iPoint));

@@ -1097,7 +1097,9 @@ void CConfig::SetConfig_Options() {
   addEnumOption("KIND_TURB_MODEL", Kind_Turb_Model, Turb_Model_Map, TURB_MODEL::NONE);
   /*!\brief SST_OPTIONS \n DESCRIPTION: Specify SST turbulence model options/corrections. \n Options: see \link SST_Options_Map \endlink \n DEFAULT: NONE \ingroup Config*/
   addEnumListOption("SST_OPTIONS", nSST_Options, SST_Options, SST_Options_Map);
-  /*!\brief SST_OPTIONS \n DESCRIPTION: Specify SA turbulence model options/corrections. \n Options: see \link SA_Options_Map \endlink \n DEFAULT: NONE \ingroup Config*/
+/*!\brief KW_OPTIONS \n DESCRIPTION: Specify KW turbulence model options/corrections. \n Options: see \link KW_Options_Map \endlink \n DEFAULT: NONE \ingroup Config*/
+  addEnumListOption("KW_OPTIONS", nKW_Options, KW_Options, KW_Options_Map);
+  /*!\brief SA_OPTIONS \n DESCRIPTION: Specify SA turbulence model options/corrections. \n Options: see \link SA_Options_Map \endlink \n DEFAULT: NONE \ingroup Config*/
   addEnumListOption("SA_OPTIONS", nSA_Options, SA_Options, SA_Options_Map);
 
   /*!\brief KIND_TRANS_MODEL \n DESCRIPTION: Specify transition model OPTIONS: see \link Trans_Model_Map \endlink \n DEFAULT: NONE \ingroup Config*/
@@ -3453,15 +3455,26 @@ void CConfig::SetPostprocessing(SU2_COMPONENT val_software, unsigned short val_i
   }
 
   /*--- Postprocess SST_OPTIONS into structure. ---*/
-  if (Kind_Turb_Model == TURB_MODEL::SST) {
+  if (Kind_Turb_Model == TURB_MODEL::SST) 
+  {
     sstParsedOptions = ParseSSTOptions(SST_Options, nSST_Options, rank);
-  } else if (Kind_Turb_Model == TURB_MODEL::SA) {
+  } 
+  else if (Kind_Turb_Model == TURB_MODEL::KW )
+  {
+    kwParsedOptions = ParseKWOptions(KW_Options, nKW_Options, rank);
+  } 
+  else if (Kind_Turb_Model == TURB_MODEL::SA) 
+  {
     saParsedOptions = ParseSAOptions(SA_Options, nSA_Options, rank);
   }
 
   /*--- Check if turbulence model can be used for AXISYMMETRIC case---*/
-  if (Axisymmetric && Kind_Turb_Model != TURB_MODEL::NONE && Kind_Turb_Model != TURB_MODEL::SST){
-    SU2_MPI::Error("Axisymmetry is currently only supported for KIND_TURB_MODEL chosen as SST", CURRENT_FUNCTION);
+  if (
+        Axisymmetric && Kind_Turb_Model != TURB_MODEL::NONE && 
+      ( Kind_Turb_Model != TURB_MODEL::SST || Kind_Turb_Model != TURB_MODEL::KW ) 
+     )
+  {
+    SU2_MPI::Error("Axisymmetry is currently only supported for KIND_TURB_MODEL chosen as SST or KW", CURRENT_FUNCTION);
   }
 
   /*--- Postprocess LM_OPTIONS into structure. ---*/
@@ -5326,6 +5339,12 @@ void CConfig::SetPostprocessing(SU2_COMPONENT val_software, unsigned short val_i
         "to be equal to 2 : Turbulent intensity and ratio turbulent to laminar viscosity",
         CURRENT_FUNCTION);
 
+  if (Marker_Inlet_Turb != nullptr && Kind_Turb_Model == TURB_MODEL::KW && nTurb_Properties != 2)
+    SU2_MPI::Error(
+        "The use of MARKER_INLET_TURBULENT requires the number of entries when KW Model is used \n"
+        "to be equal to 2 : Turbulent intensity and ratio turbulent to laminar viscosity",
+        CURRENT_FUNCTION);
+
   /*--- Checks for additional species transport. ---*/
   if (Kind_Species_Model == SPECIES_MODEL::SPECIES_TRANSPORT) {
     if (Kind_Solver != MAIN_SOLVER::INC_NAVIER_STOKES &&
@@ -6014,6 +6033,10 @@ void CConfig::SetOutput(SU2_COMPONENT val_software, unsigned short val_izone) {
             if (saParsedOptions.comp) cout << "-comp";
             if (saParsedOptions.qcr2000) cout << "-QCR2000";
             if (saParsedOptions.bc) cout << "-BCM";
+            cout << endl;
+            break;
+          case TURB_MODEL::KW:
+            cout << "Wilcox's k-omega";
             cout << endl;
             break;
           case TURB_MODEL::SST:

@@ -1228,7 +1228,7 @@ void CDriver::InstantiateTurbulentNumerics(unsigned short nVar_Turb, int offset,
 
   /*--- Assign turbulence model booleans ---*/
 
-  bool spalart_allmaras = false, menter_sst = false;
+  bool spalart_allmaras = false, menter_sst = false, wilcox_komega = false;
 
   switch (config->GetKind_Turb_Model()) {
     case TURB_MODEL::NONE:
@@ -1240,6 +1240,9 @@ void CDriver::InstantiateTurbulentNumerics(unsigned short nVar_Turb, int offset,
     case TURB_MODEL::SST:
       menter_sst = true;
       break;
+    case TURB_MODEL::KW:
+      wilcox_komega = true;
+      break;
   }
 
   /*--- If the Menter SST model is used, store the constants of the model and determine the
@@ -1248,7 +1251,7 @@ void CDriver::InstantiateTurbulentNumerics(unsigned short nVar_Turb, int offset,
   const su2double *constants = nullptr;
   su2double kine_Inf = 0.0, omega_Inf = 0.0;
 
-  if (menter_sst) {
+  if (menter_sst || wilcox_komega) {
     constants = turb_solver->GetConstants();
     kine_Inf  = turb_solver->GetTke_Inf();
     omega_Inf = turb_solver->GetOmega_Inf();
@@ -1262,11 +1265,16 @@ void CDriver::InstantiateTurbulentNumerics(unsigned short nVar_Turb, int offset,
       break;
     case SPACE_UPWIND :
       for (auto iMGlevel = 0u; iMGlevel <= config->GetnMGLevels(); iMGlevel++) {
-        if (spalart_allmaras) {
+        if (spalart_allmaras) 
+        {
           numerics[iMGlevel][TURB_SOL][conv_term] = new CUpwSca_TurbSA<Indices>(nDim, nVar_Turb, config);
-        }
-        else if (menter_sst)
+        } else if (menter_sst) 
+        {
           numerics[iMGlevel][TURB_SOL][conv_term] = new CUpwSca_TurbSST<Indices>(nDim, nVar_Turb, config);
+        } else if ( wilcox_komega )
+        {
+          numerics[iMGlevel][TURB_SOL][conv_term] = new CUpwSca_TurbKW<Indices>(nDim, nVar_Turb, config);
+        }
       }
       break;
     default:
@@ -1285,7 +1293,13 @@ void CDriver::InstantiateTurbulentNumerics(unsigned short nVar_Turb, int offset,
       }
     }
     else if (menter_sst)
+    {
       numerics[iMGlevel][TURB_SOL][visc_term] = new CAvgGrad_TurbSST<Indices>(nDim, nVar_Turb, constants, true, config);
+    }
+    else if (wilcox_komega)
+    {
+      numerics[iMGlevel][TURB_SOL][visc_term] = new CAvgGrad_TurbKW<Indices>(nDim, nVar_Turb, constants, true, config);
+    }
   }
 
   /*--- Definition of the source term integration scheme for each equation and mesh level ---*/
@@ -1294,10 +1308,17 @@ void CDriver::InstantiateTurbulentNumerics(unsigned short nVar_Turb, int offset,
     auto& turb_source_first_term = numerics[iMGlevel][TURB_SOL][source_first_term];
 
     if (spalart_allmaras)
+    {
       turb_source_first_term = SAFactory<Indices>(nDim, config);
+    }
     else if (menter_sst)
-      turb_source_first_term = new CSourcePieceWise_TurbSST<Indices>(nDim, nVar_Turb, constants, kine_Inf, omega_Inf,
-                                                                     config);
+    {
+      turb_source_first_term = new CSourcePieceWise_TurbSST<Indices>(nDim, nVar_Turb, constants, kine_Inf, omega_Inf,config);
+    }
+    else if (wilcox_komega)
+    {
+      turb_source_first_term = new CSourcePieceWise_TurbKW<Indices>(nDim, nVar_Turb, constants, kine_Inf, omega_Inf,config);
+    }
 
     numerics[iMGlevel][TURB_SOL][source_second_term] = new CSourceNothing(nDim, nVar_Turb, config);
   }
@@ -1305,7 +1326,8 @@ void CDriver::InstantiateTurbulentNumerics(unsigned short nVar_Turb, int offset,
   /*--- Definition of the boundary condition method ---*/
 
   for (auto iMGlevel = 0u; iMGlevel <= config->GetnMGLevels(); iMGlevel++) {
-    if (spalart_allmaras) {
+    if (spalart_allmaras) 
+    {
       numerics[iMGlevel][TURB_SOL][conv_bound_term] = new CUpwSca_TurbSA<Indices>(nDim, nVar_Turb, config);
 
       if (config->GetSAParsedOptions().version == SA_OPTIONS::NEG) {
@@ -1314,10 +1336,17 @@ void CDriver::InstantiateTurbulentNumerics(unsigned short nVar_Turb, int offset,
         numerics[iMGlevel][TURB_SOL][visc_bound_term] = new CAvgGrad_TurbSA<Indices>(nDim, nVar_Turb, false, config);
       }
     }
-    else if (menter_sst) {
+    else if (menter_sst) 
+    {
       numerics[iMGlevel][TURB_SOL][conv_bound_term] = new CUpwSca_TurbSST<Indices>(nDim, nVar_Turb, config);
       numerics[iMGlevel][TURB_SOL][visc_bound_term] = new CAvgGrad_TurbSST<Indices>(nDim, nVar_Turb, constants, false,
                                                                                     config);
+    } 
+    else if ( wilcox_komega )
+    {
+      numerics[iMGlevel][TURB_SOL][conv_bound_term] = new CUpwSca_TurbKW<Indices>(nDim, nVar_Turb, config);
+      numerics[iMGlevel][TURB_SOL][visc_bound_term] = new CAvgGrad_TurbKW<Indices>(nDim, nVar_Turb, constants, false,
+                                                                                    config);    
     }
   }
 }
